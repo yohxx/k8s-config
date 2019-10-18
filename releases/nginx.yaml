@@ -1,0 +1,48 @@
+---
+apiVersion: flux.weave.works/v1beta1
+kind: HelmRelease
+metadata:
+  name: mywebserver
+  namespace: nginx
+  annotations:
+    flux.weave.works/automated: "true"
+    flux.weave.works/tag.nginx: semver:~1.16
+    flux.weave.works/locked: 'true'
+    flux.weave.works/locked_msg: '"Halt updates for now"'
+    flux.weave.works/locked_user: User Name <user@example.com>
+spec:
+  releaseName: mywebserver
+  chart:
+    repository: https://charts.bitnami.com/bitnami/
+    name: nginx
+    version: 3.3.2
+  values:
+    usePassword: true
+    image:
+      registry: docker.io
+      repository: bitnami/nginx
+      tag: 1.16.0-debian-9-r46
+    service:
+      type: LoadBalancer
+      port: 80
+      nodePorts:
+        http: ""
+      externalTrafficPolicy: Cluster
+    ingress:
+      enabled: false
+    livenessProbe:
+      httpGet:
+        path: /
+        port: http
+      initialDelaySeconds: 30
+      timeoutSeconds: 5
+      failureThreshold: 6
+    readinessProbe:
+      httpGet:
+        path: /
+        port: http
+      initialDelaySeconds: 5
+      timeoutSeconds: 3
+      periodSeconds: 5
+    metrics:
+      enabled: false
